@@ -11,8 +11,8 @@
 /* Layout: tile-grid map of 33 provincial-level divisions on the left, live statistics on the right, full list by region below. Vermilion ramp = level of visit. */
 :root{
   --bg:#f3f3f4; --surface:#ffffff; --ink:#1d1b1f; --muted:#625f68; --line:#dcdade; --accent:#1f56b0;
-  --l0:#ffffff; --l1:#f5e1dc; --l2:#e9b3a6; --l3:#d77b66; --l4:#b4452f; --l5:#7a2215;
-  --t0:#57545c; --t1:#4a2019; --t2:#3d1710; --t3:#ffffff; --t4:#ffffff; --t5:#ffffff; --na:#e6e5e9;
+  --l0:#ffffff; --l1:#f0c6bb; --l2:#b4452f; --l3:#d77b66; --l4:#b4452f; --l5:#7a2215;
+  --t0:#57545c; --t1:#4a2019; --t2:#ffffff; --t3:#ffffff; --t4:#ffffff; --t5:#ffffff; --na:#e6e5e9;
   --font-display:"Noto Serif TC","Songti TC",serif;
   --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --font-map:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
@@ -21,15 +21,15 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141316; --surface:#1d1b20; --ink:#ecebef; --muted:#a3a0aa; --line:#33303a; --accent:#7fa7ee;
-    --l0:#26232a; --l1:#45282a; --l2:#73352d; --l3:#ab4c39; --l4:#e1876f; --l5:#f8c8ba;
-    --t0:#96929e; --t1:#ecd2cc; --t2:#f8e4de; --t3:#ffffff; --t4:#2a0f0a; --t5:#2a0f0a; --na:#2c2a31;
+    --l0:#26232a; --l1:#5a2e29; --l2:#e1876f; --l3:#ab4c39; --l4:#e1876f; --l5:#f8c8ba;
+    --t0:#96929e; --t1:#ecd2cc; --t2:#2a0f0a; --t3:#ffffff; --t4:#2a0f0a; --t5:#2a0f0a; --na:#2c2a31;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#141316; --surface:#1d1b20; --ink:#ecebef; --muted:#a3a0aa; --line:#33303a; --accent:#7fa7ee;
-  --l0:#26232a; --l1:#45282a; --l2:#73352d; --l3:#ab4c39; --l4:#e1876f; --l5:#f8c8ba;
-  --t0:#96929e; --t1:#ecd2cc; --t2:#f8e4de; --t3:#ffffff; --t4:#2a0f0a; --t5:#2a0f0a; --na:#2c2a31;
+  --l0:#26232a; --l1:#5a2e29; --l2:#e1876f; --l3:#ab4c39; --l4:#e1876f; --l5:#f8c8ba;
+  --t0:#96929e; --t1:#ecd2cc; --t2:#2a0f0a; --t3:#ffffff; --t4:#2a0f0a; --t5:#2a0f0a; --na:#2c2a31;
   color-scheme:dark;
 }
 
@@ -67,6 +67,17 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
 .zoom button{width:32px;height:32px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
 .zoom button:hover{border-color:var(--muted)}
 .zoom button.wide{width:auto;padding:0 10px;font-size:13px}
+.headright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-share{border:1px solid var(--l2);background:var(--l2);color:var(--t2);border-radius:999px;padding:5px 16px;font-size:14px;font-weight:500;cursor:pointer}
+.btn-share:hover{filter:brightness(1.08)}
+.btn-share:disabled{opacity:.5;cursor:wait}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(10,10,14,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.modal-box{background:var(--surface);border-radius:14px;padding:16px;max-width:460px;width:100%;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.modal-box h2{font-size:17px}
+.modal-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap}
+.modal-actions .btn{flex:1;text-align:center;text-decoration:none;color:var(--ink)}
 .mapnote{font-size:12px;color:var(--muted);margin:6px 4px 0}
 #map{display:block;width:100%;max-width:500px;margin:0 auto;height:auto;user-select:none;-webkit-user-select:none}
 .tile{cursor:pointer}
@@ -164,7 +175,10 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
       <h1>中國省級行政區足跡（含臺灣）</h1>
       <p class="sub">點地圖上的省、自治區或直轄市，選擇你在那裡的經歷。紀錄存在這個瀏覽器裡，別人看不到。換手機或電腦時，用下方的「複製備份」和「匯入備份」搬過去。</p>
     </div>
-    <span id="sync" class="sync" data-s="loading">連線中…</span>
+    <div class="headright">
+      <button type="button" class="btn-share" id="btnShare">分享圖片</button>
+      <span id="sync" class="sync" data-s="loading">連線中…</span>
+    </div>
   </header>
 
   <main class="layout">
@@ -196,15 +210,15 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
           <span class="kpi-foot" id="kPct">0%</span>
         </div>
         <div class="card kpi">
-          <span class="kpi-label">經縣值</span>
-          <span class="kpi-num"><b id="kScore">0</b><small>/ 170</small></span>
+          <span class="kpi-label">足跡分數</span>
+          <span class="kpi-num"><b id="kScore">0</b><small>/ 68</small></span>
           <span class="kpi-foot" id="kTrace">含路過共 0 個</span>
         </div>
       </div>
       <div class="card block">
         <h2>等級分布</h2>
         <div id="dist"></div>
-        <p class="note">「已到訪」計算短暫停留以上的地區。經縣值參考日本的「経県値」計分：居住 5、住宿 4、遊玩 3、短暫停留 2、路過 1，滿分 170。</p>
+        <p class="note">「已到訪」計算住宿／遊玩的地區。計分：住宿／遊玩 2、路過 1、未踏足 0，滿分 68。</p>
       </div>
       <div class="card block">
         <h2>各大區到訪</h2>
@@ -236,18 +250,28 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
   </section>
 </div>
 
+<div class="modal" id="shareModal" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="modal-box">
+    <h2 id="shareTitle">分享我的足跡</h2>
+    <img id="shareImg" alt="足跡地圖分享圖片">
+    <div class="modal-actions">
+      <button type="button" class="btn primary" id="shareNative" hidden>分享到 App…</button>
+      <a class="btn" id="shareDownload" download="我的足跡-中國含臺灣.png" href="#">下載圖片</a>
+      <button type="button" class="btn" id="shareClose">關閉</button>
+    </div>
+    <p class="msg" id="shareMsg"></p>
+  </div>
+</div>
 <script>
 (function(){
 "use strict";
 
 const LEVELS = [
-  {lv:0, name:"未踏足",   desc:"還沒去過"},
-  {lv:1, name:"路過",     desc:"搭車經過，沒有下車"},
-  {lv:2, name:"短暫停留", desc:"下車走走、轉乘或轉機"},
-  {lv:3, name:"遊玩",     desc:"白天實際走訪"},
-  {lv:4, name:"住宿",     desc:"在這裡過夜"},
-  {lv:5, name:"居住",     desc:"在這裡生活過"}
+  {lv:0, name:"未踏足",    desc:"還沒去過"},
+  {lv:1, name:"路過",      desc:"搭車經過，沒有下車"},
+  {lv:2, name:"住宿／遊玩", desc:"下車走訪、遊玩、過夜或住過"}
 ];
+const MAXLV = 2;
 const REGIONS = ["華北","東北","華東","華中","華南","西南","西北","臺灣"];
 
 // [division code, official name, map label, region index, col, row, width, height]
@@ -267,29 +291,42 @@ const P = [
   ["64","寧夏回族自治區","寧夏",6,2,2],["65","新疆維吾爾自治區","新疆",6,0,1,1,2],
   ["71","臺灣","臺灣",7,6,6]
 ];
-const TOTAL = P.length, MAXSCORE = TOTAL * 5;
+const TOTAL = P.length, MAXSCORE = TOTAL * MAXLV;
 const BY = {}; P.forEach(p => BY[p[0]] = p);
 
-const STORE_KEY = "pref-tracker-china-tw-v1";
+const STORE_KEY = "pref-tracker-china-tw-v2";
+const OLD_KEY = "pref-tracker-china-tw-v1";
 const CELL = 56, TILE = 52, PAD = 8, COLS = 7, ROWS = 9;
 
-let levels = {};               // code -> 1..5 (0 is absent)
+let levels = {};               // code -> 1..2 (0 is absent)
 let selected = null;
 
 // ---------- helpers ----------
 const $ = id => document.getElementById(id);
 const lvOf = code => levels[code] || 0;
+// old 6-level records (1 路過 ... 5 居住) map to the 3-level scale: 1 stays 路過, 2–5 become 住宿／遊玩
+function fromOld(obj){
+  const out = {};
+  if (obj && typeof obj === "object") for (const k of Object.keys(obj)){ const v = Number(obj[k]); if (Number.isInteger(v) && v >= 1) out[k] = v >= 2 ? 2 : 1; }
+  return out;
+}
 function sanitize(obj){
   const out = {};
   if (obj && typeof obj === "object"){
     for (const k of Object.keys(obj)){
       const v = Number(obj[k]);
-      if (BY[k] && Number.isInteger(v) && v >= 1 && v <= 5) out[k] = v;
+      if (BY[k] && Number.isInteger(v) && v >= 1 && v <= MAXLV) out[k] = v;
     }
   }
   return out;
 }
-function loadLocal(){ try{ const s = localStorage.getItem(STORE_KEY); if (s) return sanitize(JSON.parse(s)); }catch(e){} return {}; }
+function loadLocal(){
+  try{
+    const s = localStorage.getItem(STORE_KEY); if (s) return sanitize(JSON.parse(s));
+    const o = localStorage.getItem(OLD_KEY); if (o) return sanitize(fromOld(JSON.parse(o)));
+  }catch(e){}
+  return {};
+}
 function saveLocal(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(levels)); }catch(e){} }
 
 // ---------- map ----------
@@ -392,7 +429,13 @@ function closePicker(returnFocus){
 }
 document.addEventListener("click", ev => {
   const pk = $("picker");
-  if (!pk.hidden && !pk.contains(ev.target) && !$("geo").contains(ev.target)) closePicker(false);
+  if (pk.hidden || pk.contains(ev.target) || ev.target.isConnected === false) return;
+  const g = $("geo");
+  if (!g.hidden){
+    const r = g.getBoundingClientRect();
+    if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) return; // map handles its own clicks
+  }
+  closePicker(false);
 });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape") closePicker(true); });
 
@@ -432,9 +475,9 @@ function renderMap(){
 }
 function render(){
   renderMap();
-  const counts = [0,0,0,0,0,0];
+  const counts = LEVELS.map(() => 0);
   P.forEach(p => counts[lvOf(p[0])]++);
-  const visited = counts[2]+counts[3]+counts[4]+counts[5];
+  const visited = counts[2];
   const trace = visited + counts[1];
   const score = P.reduce((s,p) => s + lvOf(p[0]), 0);
   $("kVisited").textContent = visited;
@@ -453,11 +496,11 @@ function render(){
   const reg = $("regions"); reg.innerHTML = "";
   REGIONS.forEach((rname, ri) => {
     const ps = P.filter(p => p[3] === ri), n = ps.length;
-    const c = [0,0,0,0,0,0]; ps.forEach(p => c[lvOf(p[0])]++);
-    const v = c[2]+c[3]+c[4]+c[5];
+    const c = LEVELS.map(() => 0); ps.forEach(p => c[lvOf(p[0])]++);
+    const v = c[2];
     const row = document.createElement("div"); row.className = "reg-row";
     let segs = "";
-    for (let lv = 5; lv >= 1; lv--) if (c[lv]) segs += `<i style="width:${c[lv]/n*100}%;background:var(--l${lv})" title="${LEVELS[lv].name} ${c[lv]}"></i>`;
+    for (let lv = MAXLV; lv >= 1; lv--) if (c[lv]) segs += `<i style="width:${c[lv]/n*100}%;background:var(--l${lv})" title="${LEVELS[lv].name} ${c[lv]}"></i>`;
     row.innerHTML = `<span></span><span class="bar">${segs}</span><span class="num">${v} / ${n}</span>`;
     row.children[0].textContent = rname;
     reg.appendChild(row);
@@ -531,7 +574,7 @@ async function connect(){
 // ---------- tools ----------
 function toolMsg(t){ $("toolMsg").textContent = t; }
 $("btnCopy").addEventListener("click", async () => {
-  const text = JSON.stringify({ map: "china-tw-34", levels }, null, 0);
+  const text = JSON.stringify({ map: "china-tw-34-v2", levels }, null, 0);
   try { await navigator.clipboard.writeText(text); toolMsg("已複製備份文字，可以貼到記事本保存。"); }
   catch(e){ $("importBox").hidden = false; $("importText").value = text; $("importText").select(); toolMsg("無法自動複製，備份文字已放在下方框內，請手動複製。"); }
 });
@@ -540,7 +583,8 @@ $("btnCancel").addEventListener("click", () => { $("importBox").hidden = true; }
 $("btnApply").addEventListener("click", () => {
   try {
     const obj = JSON.parse($("importText").value);
-    const next = sanitize(obj && obj.levels ? obj.levels : obj);
+    const raw = obj && obj.levels ? obj.levels : obj;
+    const next = sanitize(obj && obj.map === "china-tw-34-v2" ? raw : fromOld(raw));
     replaceAll(next);
     $("importBox").hidden = true;
     toolMsg(`已匯入 ${Object.keys(next).length} 個地區的紀錄。`);
@@ -570,12 +614,11 @@ const LABEL = {}; Object.keys(SIMP).forEach(k => { if (BY[k]) LABEL[SIMP[k]] = B
 const OUTSIDE = ["南海诸岛"];
 let chart = null, zoom = 1;
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
-function renderGeo(){
-  if (!chart) return;
-  const fill = [0,1,2,3,4,5].map(i => cssVar("--l" + i)), ink = [0,1,2,3,4,5].map(i => cssVar("--t" + i));
+function geoData(forImage){
+  const fill = LEVELS.map(L => cssVar("--l" + L.lv)), ink = LEVELS.map(L => cssVar("--t" + L.lv));
   const line = cssVar("--muted"), na = cssVar("--na"), accent = cssVar("--accent");
   const data = Object.keys(SIMP).map(code => {
-    const lv = lvOf(code), sel = code === selected, tiny = code === "81" || code === "82";
+    const lv = lvOf(code), sel = !forImage && code === selected, tiny = code === "81" || code === "82";
     return {
       name: SIMP[code], value: lv,
       itemStyle: { areaColor: fill[lv], borderColor: sel ? accent : line, borderWidth: sel ? 2.4 : 0.6 },
@@ -586,7 +629,21 @@ function renderGeo(){
   OUTSIDE.forEach(n => data.push({ name: n, value: -1,
     itemStyle: { areaColor: na, borderColor: na, borderWidth: 0.6 }, label: { show: false },
     emphasis: { itemStyle: { areaColor: na, borderColor: na }, label: { show: false } } }));
-  chart.setOption({ series: [{ data }] });
+  return data;
+}
+function renderGeo(){
+  if (!chart) return;
+  chart.setOption({ series: [{ data: geoData(false) }] });
+}
+function baseSeries(fontSize){
+  return {
+    type: "map", map: "china", roam: false, zoom: 1, scaleLimit: { min: 1, max: 8 },
+    selectedMode: false, showLegendSymbol: false,
+    top: 8, bottom: 8, left: 8, right: 8,
+    label: { show: true, fontSize, fontFamily: cssVar("--font-map") || "sans-serif", formatter: p => LABEL[p.name] || "" },
+    itemStyle: { borderWidth: 0.6 },
+    data: []
+  };
 }
 function setZoom(z){
   zoom = Math.max(1, Math.min(8, z));
@@ -599,14 +656,7 @@ function initGeo(){
   chart = window.echarts.init(el, null, { renderer: "svg" });
   chart.setOption({
     animation: false,
-    series: [{
-      type: "map", map: "china", roam: false, zoom: 1, scaleLimit: { min: 1, max: 8 },
-      selectedMode: false, showLegendSymbol: false,
-      top: 8, bottom: 8, left: 8, right: 8,
-      label: { show: true, fontSize: 11, fontFamily: cssVar("--font-map") || "sans-serif", formatter: p => LABEL[p.name] || "" },
-      itemStyle: { borderWidth: 0.6 },
-      data: []
-    }]
+    series: [baseSeries(11)]
   });
   chart.on("click", params => {
     const code = NAME2CODE[params.name];
@@ -655,6 +705,101 @@ async function loadGeo(){
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", ev => {
   ev.stopPropagation(); openPicker(c.dataset.code, c.getBoundingClientRect());
 }));
+
+// ---------- share image ----------
+let shareFile = null, shareUrl = null;
+function loadImg(src){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+async function mapImage(w, h){
+  const box = document.createElement("div");
+  box.style.cssText = `position:fixed;left:-10000px;top:0;width:${w}px;height:${h}px`;
+  document.body.appendChild(box);
+  try {
+    const tmp = window.echarts.init(box, null, { renderer: "canvas", width: w, height: h });
+    const ser = baseSeries(15); ser.data = geoData(true); ser.itemStyle = { borderWidth: 0.8 };
+    tmp.setOption({ animation: false, series: [ser] });
+    const url = tmp.getDataURL({ type: "png", pixelRatio: 2, backgroundColor: "transparent" });
+    tmp.dispose();
+    return await loadImg(url);
+  } finally { box.remove(); }
+}
+function roundRect(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+async function buildShareImage(){
+  try { await document.fonts.ready; } catch(e){}
+  const W = 1080, H = 1350, M = 64;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const ctx = cv.getContext("2d");
+  const bg = cssVar("--bg"), surf = cssVar("--surface"), ink = cssVar("--ink"), muted = cssVar("--muted"), line = cssVar("--line");
+  const serif = '"Noto Serif TC","Songti TC",serif', sans = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // title
+  ctx.fillStyle = muted; ctx.font = `500 26px ${sans}`; ctx.textBaseline = "alphabetic";
+  ctx.fillText("我的足跡地圖", M, 92);
+  ctx.fillStyle = ink; ctx.font = `700 56px ${serif}`;
+  ctx.fillText("中國（含臺灣）", M, 162);
+  // numbers
+  const counts = LEVELS.map(() => 0); P.forEach(p => counts[lvOf(p[0])]++);
+  const visited = counts[2], score = P.reduce((a, p) => a + lvOf(p[0]), 0);
+  const stats = [[String(visited), ` / ${TOTAL}`, "已到訪"], [String(score), ` / ${MAXSCORE}`, "足跡分數"], [String(counts[1]), "", "路過"]];
+  let x = M;
+  for (const [big, small, label] of stats){
+    ctx.fillStyle = cssVar("--l2"); ctx.font = `700 64px ${serif}`; ctx.fillText(big, x, 262);
+    const bw = ctx.measureText(big).width;
+    ctx.fillStyle = muted; ctx.font = `400 26px ${sans}`; ctx.fillText(small, x + bw + 6, 262);
+    ctx.fillText(label, x, 300);
+    x += Math.max(bw + ctx.measureText(small).width + 70, 200);
+  }
+  // map panel
+  const py = 336, ph = 800;
+  ctx.fillStyle = surf; roundRect(ctx, M - 16, py, W - 2*M + 32, ph, 24); ctx.fill();
+  ctx.strokeStyle = line; ctx.lineWidth = 2; ctx.stroke();
+  const img = await mapImage(940, 780);
+  ctx.drawImage(img, (W - 940) / 2, py + 10, 940, 780);
+  // legend
+  let lx = M, ly = py + ph + 56;
+  ctx.font = `400 26px ${sans}`;
+  for (const L of [...LEVELS].reverse()){
+    ctx.fillStyle = cssVar("--l" + L.lv); roundRect(ctx, lx, ly - 22, 28, 28, 6); ctx.fill();
+    ctx.strokeStyle = line; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = ink; ctx.fillText(`${L.name} ${counts[L.lv]}`, lx + 40, ly);
+    lx += 40 + ctx.measureText(`${L.name} ${counts[L.lv]}`).width + 36;
+  }
+  // regions
+  const parts = REGIONS.map((r, ri) => { const ps = P.filter(p => p[3] === ri); return `${r} ${ps.filter(p => lvOf(p[0]) >= 2).length}/${ps.length}`; });
+  ctx.fillStyle = muted; ctx.font = `400 24px ${sans}`;
+  ctx.fillText(parts.slice(0, 4).join("　"), M, ly + 56);
+  ctx.fillText(parts.slice(4).join("　"), M, ly + 94);
+  // footer
+  ctx.font = `400 22px ${sans}`; ctx.textAlign = "right";
+  ctx.fillText(location.host + location.pathname.replace(/[^/]*$/, ""), W - M, H - 40);
+  ctx.textAlign = "left";
+  return await new Promise(res => cv.toBlob(res, "image/png"));
+}
+$("btnShare").addEventListener("click", async () => {
+  const btn = $("btnShare");
+  if (!chart){ toolMsg("地圖還在載入，請稍後再按「分享圖片」。"); return; }
+  btn.disabled = true; btn.textContent = "產生中…";
+  try {
+    const blob = await buildShareImage();
+    if (shareUrl) URL.revokeObjectURL(shareUrl);
+    shareUrl = URL.createObjectURL(blob);
+    shareFile = new File([blob], "我的足跡-中國含臺灣.png", { type: "image/png" });
+    $("shareImg").src = shareUrl; $("shareDownload").href = shareUrl;
+    let canNative = false;
+    try { canNative = !!(navigator.canShare && navigator.canShare({ files: [shareFile] })); } catch(e){}
+    $("shareNative").hidden = !canNative;
+    $("shareMsg").textContent = canNative ? "可以直接分享到 LINE、IG 等 App，或下載圖片。" : "按「下載圖片」存下來，再傳給朋友或貼到社群。";
+    $("shareModal").hidden = false; $("shareClose").focus();
+  } catch(e){
+    toolMsg("圖片產生失敗，請重新整理頁面後再試一次。");
+  } finally { btn.disabled = false; btn.textContent = "分享圖片"; }
+});
+$("shareNative").addEventListener("click", async () => {
+  try { await navigator.share({ files: [shareFile], title: "我的足跡地圖" }); }
+  catch(e){ if (e && e.name !== "AbortError") $("shareMsg").textContent = "這個裝置無法直接分享，請改用「下載圖片」。"; }
+});
+$("shareClose").addEventListener("click", () => { $("shareModal").hidden = true; $("btnShare").focus(); });
+$("shareModal").addEventListener("click", ev => { if (ev.target === $("shareModal")) $("shareModal").hidden = true; });
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !$("shareModal").hidden) $("shareModal").hidden = true; });
 
 // ---------- start ----------
 buildMap(); buildList();
