@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>中國省級行政區足跡（含臺灣）</title>
+<title>中國省級行政區足跡</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
@@ -172,7 +172,7 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
     <div>
       <a class="back" href="./">← 所有地圖</a>
       <p class="eyebrow">22 省 · 5 自治區 · 4 直轄市 · 2 特別行政區 · 臺灣</p>
-      <h1>中國省級行政區足跡（含臺灣）</h1>
+      <h1>中國省級行政區足跡</h1>
       <p class="sub">點地圖上的省、自治區或直轄市，選擇你在那裡的經歷。紀錄存在這個瀏覽器裡，別人看不到。換手機或電腦時，用下方的「複製備份」和「匯入備份」搬過去。</p>
     </div>
     <div class="headright">
@@ -256,7 +256,7 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
     <img id="shareImg" alt="足跡地圖分享圖片">
     <div class="modal-actions">
       <button type="button" class="btn primary" id="shareNative" hidden>分享到 App…</button>
-      <a class="btn" id="shareDownload" download="我的足跡-中國含臺灣.png" href="#">下載圖片</a>
+      <a class="btn" id="shareDownload" download="我的足跡-中國.png" href="#">下載圖片</a>
       <button type="button" class="btn" id="shareClose">關閉</button>
     </div>
     <p class="msg" id="shareMsg"></p>
@@ -735,7 +735,7 @@ async function buildShareImage(){
   ctx.fillStyle = muted; ctx.font = `500 26px ${sans}`; ctx.textBaseline = "alphabetic";
   ctx.fillText("我的足跡地圖", M, 92);
   ctx.fillStyle = ink; ctx.font = `700 56px ${serif}`;
-  ctx.fillText("中國（含臺灣）", M, 162);
+  ctx.fillText("中國", M, 162);
   // numbers
   const counts = LEVELS.map(() => 0); P.forEach(p => counts[lvOf(p[0])]++);
   const visited = counts[2], score = P.reduce((a, p) => a + lvOf(p[0]), 0);
@@ -782,7 +782,7 @@ $("btnShare").addEventListener("click", async () => {
     const blob = await buildShareImage();
     if (shareUrl) URL.revokeObjectURL(shareUrl);
     shareUrl = URL.createObjectURL(blob);
-    shareFile = new File([blob], "我的足跡-中國含臺灣.png", { type: "image/png" });
+    shareFile = new File([blob], "我的足跡-中國.png", { type: "image/png" });
     $("shareImg").src = shareUrl; $("shareDownload").href = shareUrl;
     let canNative = false;
     try { canNative = !!(navigator.canShare && navigator.canShare({ files: [shareFile] })); } catch(e){}
