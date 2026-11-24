@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中國省級行政區足跡（含臺灣）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+<style>
+/* Layout: tile-grid map of 33 provincial-level divisions on the left, live statistics on the right, full list by region below. Vermilion ramp = level of visit. */
+:root{
+  --bg:#f3f3f4; --surface:#ffffff; --ink:#1d1b1f; --muted:#625f68; --line:#dcdade; --accent:#1f56b0;
+  --l0:#ffffff; --l1:#f5e1dc; --l2:#e9b3a6; --l3:#d77b66; --l4:#b4452f; --l5:#7a2215;
+  --t0:#57545c; --t1:#4a2019; --t2:#3d1710; --t3:#ffffff; --t4:#ffffff; --t5:#ffffff; --na:#e6e5e9;
+  --font-display:"Noto Serif TC","Songti TC",serif;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --font-map:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141316; --surface:#1d1b20; --ink:#ecebef; --muted:#a3a0aa; --line:#33303a; --accent:#7fa7ee;
+    --l0:#26232a; --l1:#45282a; --l2:#73352d; --l3:#ab4c39; --l4:#e1876f; --l5:#f8c8ba;
+    --t0:#96929e; --t1:#ecd2cc; --t2:#f8e4de; --t3:#ffffff; --t4:#2a0f0a; --t5:#2a0f0a; --na:#2c2a31;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141316; --surface:#1d1b20; --ink:#ecebef; --muted:#a3a0aa; --line:#33303a; --accent:#7fa7ee;
+  --l0:#26232a; --l1:#45282a; --l2:#73352d; --l3:#ab4c39; --l4:#e1876f; --l5:#f8c8ba;
+  --t0:#96929e; --t1:#ecd2cc; --t2:#f8e4de; --t3:#ffffff; --t4:#2a0f0a; --t5:#2a0f0a; --na:#2c2a31;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{text-wrap:balance;margin:0}
+button,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.back{display:inline-block;margin-bottom:10px;font-size:14px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--ink);text-decoration:underline}
+.eyebrow{margin:0 0 4px;font-size:13px;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing:.02em}
+.sub{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.sync{font-size:13px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);white-space:nowrap}
+.sync[data-s="synced"]{color:var(--ink)}
+.sync[data-s="synced"]::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#3a9a62;margin-right:7px;vertical-align:1px}
+.sync[data-s="local"]::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#c99a2e;margin-right:7px;vertical-align:1px}
+
+.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);gap:20px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.mapcard{padding:14px}
+.mapwrap{position:relative}
+.geo{width:100%;aspect-ratio:1.18;min-height:300px}
+.geo[hidden],#map[hidden],.mapbar[hidden]{display:none}
+.mapbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 4px 2px;border-top:1px solid var(--line);margin-top:6px}
+.sars{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 12px 3px 6px;background:var(--surface);cursor:pointer;font-size:14px;color:var(--ink)}
+.chip:hover{border-color:var(--muted)}
+.chip .sw{width:14px;height:14px;border-radius:50%}
+.zoom{display:flex;gap:4px}
+.zoom button{width:32px;height:32px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
+.zoom button:hover{border-color:var(--muted)}
+.zoom button.wide{width:auto;padding:0 10px;font-size:13px}
+.mapnote{font-size:12px;color:var(--muted);margin:6px 4px 0}
+#map{display:block;width:100%;max-width:500px;margin:0 auto;height:auto;user-select:none;-webkit-user-select:none}
+.tile{cursor:pointer}
+.tile rect{stroke:var(--line);stroke-width:1;transition:fill .15s}
+.tile text{font-family:var(--font-map);font-weight:700;font-size:15px;pointer-events:none;text-anchor:middle;dominant-baseline:central}
+.tile:hover rect{stroke:var(--ink);stroke-width:1.6}
+.tile:focus{outline:none}
+.tile:focus-visible rect,.tile.sel rect{stroke:var(--accent);stroke-width:3}
+.lv0 rect{fill:var(--l0)} .lv0 text{fill:var(--t0)}
+.lv1 rect{fill:var(--l1)} .lv1 text{fill:var(--t1)}
+.lv2 rect{fill:var(--l2)} .lv2 text{fill:var(--t2)}
+.lv3 rect{fill:var(--l3)} .lv3 text{fill:var(--t3)}
+.lv4 rect{fill:var(--l4)} .lv4 text{fill:var(--t4)}
+.lv5 rect{fill:var(--l5)} .lv5 text{fill:var(--t5)}
+.inset{fill:none;stroke:var(--muted);stroke-dasharray:4 4;stroke-width:1}
+.maphint{font-size:13px;fill:var(--muted);font-family:var(--font-body)}
+.region-tag{font-size:12px;fill:var(--muted);font-family:var(--font-body);letter-spacing:.06em}
+
+.picker{position:absolute;z-index:5;width:250px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(10,20,40,.18);padding:12px}
+.picker[hidden]{display:none}
+.pk-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.pk-name{font-family:var(--font-map);font-weight:700;font-size:18px}
+.pk-region{font-size:12px;color:var(--muted)}
+.pk-close{border:0;background:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:2px 6px;border-radius:6px}
+.pk-close:hover{background:var(--bg)}
+.pk-list{display:flex;flex-direction:column;gap:4px}
+.pk-btn{display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:10px;text-align:left;border:1px solid transparent;background:none;border-radius:8px;padding:6px 8px;cursor:pointer}
+.pk-btn:hover{background:var(--bg)}
+.pk-btn[aria-pressed="true"]{border-color:var(--accent);background:var(--bg)}
+.pk-btn b{font-weight:500}
+.pk-btn small{display:block;color:var(--muted);font-size:12px;line-height:1.35}
+.pk-pts{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sw{width:16px;height:16px;border-radius:4px;border:1px solid var(--line);display:inline-block;flex:none}
+.sw0{background:var(--l0)} .sw1{background:var(--l1)} .sw2{background:var(--l2)} .sw3{background:var(--l3)} .sw4{background:var(--l4)} .sw5{background:var(--l5)}
+
+.stats{display:flex;flex-direction:column;gap:16px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi-label{font-size:13px;color:var(--muted)}
+.kpi-num{font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.kpi-num b{font-family:var(--font-display);font-size:40px;line-height:1.1}
+.kpi-num small{color:var(--muted);font-size:15px}
+.kpi-foot{font-size:13px;color:var(--muted)}
+.kpi.primary b{color:var(--l4)}
+.block{padding:16px}
+.block h2{font-size:15px;font-weight:700;margin-bottom:10px}
+.note{margin:10px 0 0;font-size:12.5px;color:var(--muted);line-height:1.55}
+.dist-row{display:grid;grid-template-columns:16px 5.2em 1fr 2.2em;align-items:center;gap:10px;font-size:14px;padding:3px 0}
+.bar{height:8px;border-radius:4px;background:var(--bg);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.num{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.reg-row{display:grid;grid-template-columns:5.4em 1fr 3.4em;align-items:center;gap:10px;font-size:14px;padding:4px 0}
+.reg-row .bar{height:10px}
+
+.listsec{padding:18px}
+.listhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.listhead h2{font-size:18px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px}
+.btn:hover{border-color:var(--muted)}
+.btn.danger[data-armed="1"]{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--l4);border-color:var(--l4);color:var(--t4)}
+.importbox{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.importbox[hidden]{display:none}
+.importbox textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.importbox .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.msg{font-size:13px;color:var(--muted)}
+.regiongrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.rcard{border:1px solid var(--line);border-radius:10px;padding:12px}
+.rcard h3{font-size:15px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.rcard h3 span{font-size:13px;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+.prow{display:grid;grid-template-columns:16px 1fr auto;align-items:center;gap:8px;padding:3px 0}
+.prow label{font-family:var(--font-map);font-weight:500}
+.prow select{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;font-size:13.5px;cursor:pointer}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .wrap{padding:20px 16px 40px}
+  h1{font-size:28px}
+  .mapcard{padding:8px}
+  .picker{position:fixed;left:12px !important;right:12px;top:auto !important;bottom:12px;width:auto}
+  .kpi-num b{font-size:34px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <a class="back" href="./">← 所有地圖</a>
+      <p class="eyebrow">22 省 · 5 自治區 · 4 直轄市 · 2 特別行政區 · 臺灣</p>
+      <h1>中國省級行政區足跡（含臺灣）</h1>
+      <p class="sub">點地圖上的省、自治區或直轄市，選擇你在那裡的經歷。紀錄存在這個瀏覽器裡，別人看不到。換手機或電腦時，用下方的「複製備份」和「匯入備份」搬過去。</p>
+    </div>
+    <span id="sync" class="sync" data-s="loading">連線中…</span>
+  </header>
+
+  <main class="layout">
+    <section class="card mapcard" aria-label="省級行政區地圖">
+      <div class="mapwrap" id="mapwrap">
+        <div id="geo" class="geo" role="img" aria-label="中國省級行政區地圖，依造訪等級上色"></div>
+        <svg id="map" role="group" aria-label="34 個地區方格地圖" hidden></svg>
+        <div id="picker" class="picker" hidden role="dialog" aria-modal="false" aria-labelledby="pkName"></div>
+      </div>
+      <div class="mapbar" id="mapbar">
+        <div class="sars"><span>港澳在地圖上很小，也可以點這裡：</span>
+          <button type="button" class="chip" data-code="81"><span class="sw sw0"></span>香港</button>
+          <button type="button" class="chip" data-code="82"><span class="sw sw0"></span>澳門</button>
+        </div>
+        <div class="zoom">
+          <button type="button" id="zIn" aria-label="放大">＋</button>
+          <button type="button" id="zOut" aria-label="縮小">－</button>
+          <button type="button" id="zReset" class="wide">重設</button>
+        </div>
+      </div>
+      <p class="mapnote" id="mapnote">點省份標記造訪等級。放大後可以拖曳地圖。灰色的南海諸島不在這張統計裡。</p>
+    </section>
+
+    <aside class="stats">
+      <div class="kpis">
+        <div class="card kpi primary">
+          <span class="kpi-label">已到訪</span>
+          <span class="kpi-num"><b id="kVisited">0</b><small>/ 34</small></span>
+          <span class="kpi-foot" id="kPct">0%</span>
+        </div>
+        <div class="card kpi">
+          <span class="kpi-label">經縣值</span>
+          <span class="kpi-num"><b id="kScore">0</b><small>/ 170</small></span>
+          <span class="kpi-foot" id="kTrace">含路過共 0 個</span>
+        </div>
+      </div>
+      <div class="card block">
+        <h2>等級分布</h2>
+        <div id="dist"></div>
+        <p class="note">「已到訪」計算短暫停留以上的地區。經縣值參考日本的「経県値」計分：居住 5、住宿 4、遊玩 3、短暫停留 2、路過 1，滿分 170。</p>
+      </div>
+      <div class="card block">
+        <h2>各大區到訪</h2>
+        <div id="regions"></div>
+      </div>
+    </aside>
+  </main>
+
+  <section class="card listsec">
+    <div class="listhead">
+      <h2>省級行政區清單</h2>
+      <div class="tools">
+        <button class="btn" id="btnCopy" type="button">複製備份</button>
+        <button class="btn" id="btnImport" type="button">匯入備份</button>
+        <button class="btn danger" id="btnReset" type="button" data-armed="0">全部清除</button>
+      </div>
+    </div>
+    <div class="importbox" id="importBox" hidden>
+      <label for="importText" class="msg">貼上之前用「複製備份」得到的文字：</label>
+      <textarea id="importText" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="btn primary" id="btnApply" type="button">套用</button>
+        <button class="btn" id="btnCancel" type="button">取消</button>
+        <span class="msg" id="importMsg"></span>
+      </div>
+    </div>
+    <p class="msg" id="toolMsg" aria-live="polite" style="margin:-6px 0 10px"></p>
+    <div class="regiongrid" id="list"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const LEVELS = [
+  {lv:0, name:"未踏足",   desc:"還沒去過"},
+  {lv:1, name:"路過",     desc:"搭車經過，沒有下車"},
+  {lv:2, name:"短暫停留", desc:"下車走走、轉乘或轉機"},
+  {lv:3, name:"遊玩",     desc:"白天實際走訪"},
+  {lv:4, name:"住宿",     desc:"在這裡過夜"},
+  {lv:5, name:"居住",     desc:"在這裡生活過"}
+];
+const REGIONS = ["華北","東北","華東","華中","華南","西南","西北","臺灣"];
+
+// [division code, official name, map label, region index, col, row, width, height]
+const P = [
+  ["11","北京市","北京",0,4,2],["12","天津市","天津",0,5,2],["13","河北省","河北",0,4,3],
+  ["14","山西省","山西",0,3,2],["15","內蒙古自治區","內蒙古",0,1,1,5,1],
+  ["21","遼寧省","遼寧",1,6,2],["22","吉林省","吉林",1,6,1],["23","黑龍江省","黑龍江",1,6,0],
+  ["31","上海市","上海",2,6,4],["32","江蘇省","江蘇",2,5,4],["33","浙江省","浙江",2,5,5],
+  ["34","安徽省","安徽",2,4,4],["35","福建省","福建",2,5,6],["36","江西省","江西",2,4,5],
+  ["37","山東省","山東",2,5,3],
+  ["41","河南省","河南",3,3,3],["42","湖北省","湖北",3,3,4],["43","湖南省","湖南",3,3,5],
+  ["44","廣東省","廣東",4,3,6,2,1],["45","廣西壯族自治區","廣西",4,2,6],["46","海南省","海南",4,2,8],
+  ["81","香港特別行政區","香港",4,4,7],["82","澳門特別行政區","澳門",4,3,7],
+  ["50","重慶市","重慶",5,2,4],["51","四川省","四川",5,1,4],["52","貴州省","貴州",5,2,5],
+  ["53","雲南省","雲南",5,1,5],["54","西藏自治區","西藏",5,0,3,1,2],
+  ["61","陝西省","陝西",6,2,3],["62","甘肅省","甘肅",6,1,2],["63","青海省","青海",6,1,3],
+  ["64","寧夏回族自治區","寧夏",6,2,2],["65","新疆維吾爾自治區","新疆",6,0,1,1,2],
+  ["71","臺灣","臺灣",7,6,6]
+];
+const TOTAL = P.length, MAXSCORE = TOTAL * 5;
+const BY = {}; P.forEach(p => BY[p[0]] = p);
+
+const STORE_KEY = "pref-tracker-china-tw-v1";
+const CELL = 56, TILE = 52, PAD = 8, COLS = 7, ROWS = 9;
+
+let levels = {};               // code -> 1..5 (0 is absent)
+let selected = null;
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const lvOf = code => levels[code] || 0;
+function sanitize(obj){
+  const out = {};
+  if (obj && typeof obj === "object"){
+    for (const k of Object.keys(obj)){
+      const v = Number(obj[k]);
+      if (BY[k] && Number.isInteger(v) && v >= 1 && v <= 5) out[k] = v;
+    }
+  }
+  return out;
+}
+function loadLocal(){ try{ const s = localStorage.getItem(STORE_KEY); if (s) return sanitize(JSON.parse(s)); }catch(e){} return {}; }
+function saveLocal(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(levels)); }catch(e){} }
+
+// ---------- map ----------
+function buildMap(){
+  const svg = $("map");
+  const W = PAD*2 + COLS*CELL - (CELL-TILE), H = PAD*2 + ROWS*CELL - (CELL-TILE);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const NS = "http://www.w3.org/2000/svg";
+  // hint in empty sea area
+  const hint = document.createElementNS(NS,"text");
+  hint.setAttribute("class","maphint"); hint.setAttribute("x", PAD); hint.setAttribute("y", PAD+14);
+  hint.textContent = "點一個地區來標記";
+  svg.appendChild(hint);
+  const hint2 = document.createElementNS(NS,"text");
+  hint2.setAttribute("class","maphint"); hint2.setAttribute("x", PAD); hint2.setAttribute("y", PAD+34);
+  hint2.textContent = "顏色越深，待得越久";
+  svg.appendChild(hint2);
+
+  for (const p of P){
+    const [code,, label,, c, r] = p;
+    const sw = p[6] || 1, sh = p[7] || 1;
+    const w = TILE + (sw-1)*CELL, h = TILE + (sh-1)*CELL;
+    const g = document.createElementNS(NS,"g");
+    g.setAttribute("class","tile lv0"); g.setAttribute("data-code", code);
+    g.setAttribute("tabindex","0"); g.setAttribute("role","button");
+    const rect = document.createElementNS(NS,"rect");
+    rect.setAttribute("x", PAD + c*CELL); rect.setAttribute("y", PAD + r*CELL);
+    rect.setAttribute("width", w); rect.setAttribute("height", h); rect.setAttribute("rx", 7);
+    const t = document.createElementNS(NS,"text");
+    t.setAttribute("x", PAD + c*CELL + w/2); t.setAttribute("y", PAD + r*CELL + h/2 + 1);
+    t.textContent = label;
+    const title = document.createElementNS(NS,"title");
+    g.append(rect, t, title);
+    svg.appendChild(g);
+    g.addEventListener("click", ev => { ev.stopPropagation(); openPicker(code); });
+    g.addEventListener("keydown", ev => {
+      if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); openPicker(code); }
+    });
+  }
+}
+
+// ---------- picker ----------
+let lastAnchor = null;
+function anchorFor(code){
+  const t = document.querySelector(`.tile[data-code="${code}"]`);
+  return (t && !$("map").hasAttribute("hidden")) ? t.getBoundingClientRect() : null;
+}
+function openPicker(code, anchor){
+  selected = code;
+  lastAnchor = anchor || anchorFor(code);
+  const p = BY[code], cur = lvOf(code), pk = $("picker");
+  pk.innerHTML = "";
+  const head = document.createElement("div"); head.className = "pk-head";
+  const left = document.createElement("div");
+  const nm = document.createElement("div"); nm.className = "pk-name"; nm.id = "pkName"; nm.textContent = p[1];
+  const rg = document.createElement("div"); rg.className = "pk-region"; rg.textContent = REGIONS[p[3]] + "地區";
+  left.append(nm, rg);
+  const x = document.createElement("button"); x.className = "pk-close"; x.type = "button"; x.setAttribute("aria-label","關閉"); x.textContent = "×";
+  x.addEventListener("click", closePicker);
+  head.append(left, x);
+  const list = document.createElement("div"); list.className = "pk-list";
+  for (const L of [...LEVELS].reverse()){
+    const b = document.createElement("button"); b.type = "button"; b.className = "pk-btn";
+    b.setAttribute("aria-pressed", String(L.lv === cur));
+    b.innerHTML = `<span class="sw sw${L.lv}"></span><span><b></b><small></small></span><span class="pk-pts">${L.lv ? L.lv + " 分" : ""}</span>`;
+    b.querySelector("b").textContent = L.name;
+    b.querySelector("small").textContent = L.desc;
+    b.addEventListener("click", () => { setLevel(code, L.lv); closePicker(true); });
+    list.appendChild(b);
+  }
+  pk.append(head, list);
+  pk.hidden = false;
+  positionPicker();
+  renderMap();
+  const pressed = pk.querySelector('[aria-pressed="true"]'); (pressed || pk.querySelector(".pk-btn")).focus({preventScroll:true});
+}
+function positionPicker(){
+  const pk = $("picker"), wrap = $("mapwrap");
+  if (window.matchMedia("(max-width:560px)").matches) return; // bottom sheet via CSS
+  const wr = wrap.getBoundingClientRect();
+  const tr = lastAnchor || {left: wr.left + wr.width/2, right: wr.left + wr.width/2, top: wr.top + wr.height/2, height: 0};
+  const pw = pk.offsetWidth, ph = pk.offsetHeight;
+  let left = tr.right - wr.left + 8;
+  if (left + pw > wr.width) left = tr.left - wr.left - pw - 8;
+  if (left < 0) left = Math.max(0, (wr.width - pw)/2);
+  let top = tr.top - wr.top + tr.height/2 - ph/2;
+  top = Math.max(0, Math.min(top, wr.height - ph));
+  pk.style.left = left + "px"; pk.style.top = top + "px";
+}
+function closePicker(returnFocus){
+  const pk = $("picker");
+  if (pk.hidden) return;
+  pk.hidden = true;
+  const code = selected; selected = null;
+  renderMap();
+  if (returnFocus && code){
+    const t = !$("map").hasAttribute("hidden") ? document.querySelector(`.tile[data-code="${code}"]`) : document.querySelector(`.chip[data-code="${code}"]`);
+    if (t) t.focus({preventScroll:true});
+  }
+}
+document.addEventListener("click", ev => {
+  const pk = $("picker");
+  if (!pk.hidden && !pk.contains(ev.target) && !$("geo").contains(ev.target)) closePicker(false);
+});
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") closePicker(true); });
+
+// ---------- list ----------
+function buildList(){
+  const root = $("list");
+  REGIONS.forEach((rname, ri) => {
+    const card = document.createElement("div"); card.className = "rcard";
+    const h = document.createElement("h3"); h.innerHTML = `<b></b><span id="rc-${ri}"></span>`;
+    h.querySelector("b").textContent = rname;
+    card.appendChild(h);
+    P.filter(p => p[3] === ri).forEach(p => {
+      const row = document.createElement("div"); row.className = "prow";
+      const sw = document.createElement("span"); sw.className = "sw sw0"; sw.id = "sw-" + p[0];
+      const lab = document.createElement("label"); lab.setAttribute("for", "sel-" + p[0]); lab.textContent = p[1];
+      const sel = document.createElement("select"); sel.id = "sel-" + p[0];
+      LEVELS.forEach(L => { const o = document.createElement("option"); o.value = L.lv; o.textContent = L.name; sel.appendChild(o); });
+      sel.addEventListener("change", () => setLevel(p[0], Number(sel.value)));
+      row.append(sw, lab, sel);
+      card.appendChild(row);
+    });
+    root.appendChild(card);
+  });
+}
+
+// ---------- render ----------
+function renderMap(){
+  renderGeo();
+  document.querySelectorAll(".chip").forEach(c => { c.querySelector(".sw").className = "sw sw" + lvOf(c.dataset.code); });
+  document.querySelectorAll(".tile").forEach(g => {
+    const code = g.getAttribute("data-code"), lv = lvOf(code);
+    g.setAttribute("class", `tile lv${lv}` + (code === selected ? " sel" : ""));
+    const label = `${BY[code][1]}：${LEVELS[lv].name}`;
+    g.setAttribute("aria-label", label);
+    g.querySelector("title").textContent = label;
+  });
+}
+function render(){
+  renderMap();
+  const counts = [0,0,0,0,0,0];
+  P.forEach(p => counts[lvOf(p[0])]++);
+  const visited = counts[2]+counts[3]+counts[4]+counts[5];
+  const trace = visited + counts[1];
+  const score = P.reduce((s,p) => s + lvOf(p[0]), 0);
+  $("kVisited").textContent = visited;
+  $("kPct").textContent = `${Math.round(visited/TOTAL*100)}% 的省級行政區`;
+  $("kScore").textContent = score;
+  $("kTrace").textContent = `含路過共 ${trace} 個`;
+
+  const dist = $("dist"); dist.innerHTML = "";
+  for (const L of [...LEVELS].reverse()){
+    const row = document.createElement("div"); row.className = "dist-row";
+    row.innerHTML = `<span class="sw sw${L.lv}"></span><span></span><span class="bar"><i style="width:${counts[L.lv]/TOTAL*100}%;background:var(--l${L.lv === 0 ? 1 : L.lv})"></i></span><span class="num">${counts[L.lv]}</span>`;
+    row.children[1].textContent = L.name;
+    dist.appendChild(row);
+  }
+
+  const reg = $("regions"); reg.innerHTML = "";
+  REGIONS.forEach((rname, ri) => {
+    const ps = P.filter(p => p[3] === ri), n = ps.length;
+    const c = [0,0,0,0,0,0]; ps.forEach(p => c[lvOf(p[0])]++);
+    const v = c[2]+c[3]+c[4]+c[5];
+    const row = document.createElement("div"); row.className = "reg-row";
+    let segs = "";
+    for (let lv = 5; lv >= 1; lv--) if (c[lv]) segs += `<i style="width:${c[lv]/n*100}%;background:var(--l${lv})" title="${LEVELS[lv].name} ${c[lv]}"></i>`;
+    row.innerHTML = `<span></span><span class="bar">${segs}</span><span class="num">${v} / ${n}</span>`;
+    row.children[0].textContent = rname;
+    reg.appendChild(row);
+    const rc = $("rc-" + ri); if (rc) rc.textContent = `${v} / ${n}`;
+  });
+
+  P.forEach(p => {
+    const lv = lvOf(p[0]);
+    const sel = $("sel-" + p[0]); if (sel && Number(sel.value) !== lv) sel.value = String(lv);
+    const sw = $("sw-" + p[0]); if (sw) sw.className = "sw sw" + lv;
+  });
+}
+
+// ---------- persistence ----------
+let docRef = null, dirty = false, saving = false, timer = null, loadTimer = null;
+function setStatus(s){
+  const el = $("sync"); el.dataset.s = s;
+  el.textContent = { loading:"連線中…", saving:"儲存中…", synced:"已存到帳號", local:"已存在這個瀏覽器", stale:"暫時連不上，稍後會同步" }[s] || s;
+}
+function setLevel(code, lv){
+  if (lvOf(code) === lv) return;
+  if (lv) levels[code] = lv; else delete levels[code];
+  render(); saveLocal(); scheduleSave();
+}
+function replaceAll(next){ levels = sanitize(next); render(); saveLocal(); scheduleSave(); }
+function scheduleSave(){
+  if (!docRef) return;
+  dirty = true; setStatus("saving");
+  clearTimeout(timer); timer = setTimeout(flush, 700);
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function flush(){
+  if (saving || !dirty || !docRef) return;
+  saving = true; dirty = false;
+  const body = { levels: { ...levels }, updatedAt: new Date().toISOString(), schema: 1 };
+  let ok = false;
+  for (let attempt = 0; attempt < 2 && !ok; attempt++){
+    try { await docRef.set(body); ok = true; }
+    catch (e){
+      const code = e && e.code;
+      if (attempt === 0 && (code === "unavailable" || !code)) { await sleep(700 + Math.random()*800); continue; }
+      docRef = null; setStatus("local"); break;
+    }
+  }
+  if (!ok && docRef) { setStatus("stale"); dirty = true; }
+  saving = false;
+  if (ok){ if (dirty) flush(); else setStatus("synced"); }
+}
+async function connect(){
+  if (!window.claude || typeof window.claude.use !== "function"){ setStatus("local"); return; }
+  let db = null, user = null;
+  try { [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } catch(e){}
+  let uid = null;
+  try { uid = user ? await user.id() : null; } catch(e){}
+  if (!db || !uid){ setStatus("local"); return; }
+  try { docRef = db.collection("data/users/" + uid).doc("china-tw"); } catch(e){ setStatus("local"); return; }
+  loadTimer = setTimeout(() => setStatus("stale"), 10000);
+  docRef.onSnapshot(snap => {
+    if (!snap.metadata.fromCache) clearTimeout(loadTimer);
+    if (snap.metadata.hasPendingWrites || dirty || saving) return;
+    if (snap.exists){
+      const d = snap.data() || {};
+      levels = sanitize(d.levels); render(); saveLocal();
+      setStatus(snap.metadata.fromCache ? "saving" : "synced");
+    } else if (!snap.metadata.fromCache){
+      if (Object.keys(levels).length){ dirty = true; flush(); } else setStatus("synced");
+    }
+  }, err => { clearTimeout(loadTimer); docRef = null; setStatus("local"); });
+}
+
+// ---------- tools ----------
+function toolMsg(t){ $("toolMsg").textContent = t; }
+$("btnCopy").addEventListener("click", async () => {
+  const text = JSON.stringify({ map: "china-tw-34", levels }, null, 0);
+  try { await navigator.clipboard.writeText(text); toolMsg("已複製備份文字，可以貼到記事本保存。"); }
+  catch(e){ $("importBox").hidden = false; $("importText").value = text; $("importText").select(); toolMsg("無法自動複製，備份文字已放在下方框內，請手動複製。"); }
+});
+$("btnImport").addEventListener("click", () => { $("importBox").hidden = false; $("importText").value = ""; $("importMsg").textContent = ""; $("importText").focus(); });
+$("btnCancel").addEventListener("click", () => { $("importBox").hidden = true; });
+$("btnApply").addEventListener("click", () => {
+  try {
+    const obj = JSON.parse($("importText").value);
+    const next = sanitize(obj && obj.levels ? obj.levels : obj);
+    replaceAll(next);
+    $("importBox").hidden = true;
+    toolMsg(`已匯入 ${Object.keys(next).length} 個地區的紀錄。`);
+  } catch(e){ $("importMsg").textContent = "看不懂這段文字，請貼上完整的備份內容。"; }
+});
+let resetTimer = null;
+$("btnReset").addEventListener("click", () => {
+  const b = $("btnReset");
+  if (b.dataset.armed === "1"){
+    clearTimeout(resetTimer); b.dataset.armed = "0"; b.textContent = "全部清除";
+    replaceAll({}); toolMsg("已清除全部紀錄。");
+  } else {
+    b.dataset.armed = "1"; b.textContent = "再按一次確定清除";
+    resetTimer = setTimeout(() => { b.dataset.armed = "0"; b.textContent = "全部清除"; }, 4000);
+  }
+});
+window.addEventListener("resize", () => { closePicker(false); if (chart) chart.resize(); });
+
+
+// ---------- real-shape map (ECharts 4 + its China outline data) ----------
+const SIMP = {"11":"北京","12":"天津","13":"河北","14":"山西","15":"内蒙古","21":"辽宁","22":"吉林","23":"黑龙江",
+  "31":"上海","32":"江苏","33":"浙江","34":"安徽","35":"福建","36":"江西","37":"山东","41":"河南","42":"湖北","43":"湖南",
+  "44":"广东","45":"广西","46":"海南","50":"重庆","51":"四川","52":"贵州","53":"云南","54":"西藏","61":"陕西","62":"甘肃",
+  "63":"青海","64":"宁夏","65":"新疆","81":"香港","82":"澳门","71":"台湾"};
+const NAME2CODE = {}; Object.keys(SIMP).forEach(k => NAME2CODE[SIMP[k]] = k);
+const LABEL = {}; Object.keys(SIMP).forEach(k => { if (BY[k]) LABEL[SIMP[k]] = BY[k][2]; });
+const OUTSIDE = ["南海诸岛"];
+let chart = null, zoom = 1;
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function renderGeo(){
+  if (!chart) return;
+  const fill = [0,1,2,3,4,5].map(i => cssVar("--l" + i)), ink = [0,1,2,3,4,5].map(i => cssVar("--t" + i));
+  const line = cssVar("--muted"), na = cssVar("--na"), accent = cssVar("--accent");
+  const data = Object.keys(SIMP).map(code => {
+    const lv = lvOf(code), sel = code === selected, tiny = code === "81" || code === "82";
+    return {
+      name: SIMP[code], value: lv,
+      itemStyle: { areaColor: fill[lv], borderColor: sel ? accent : line, borderWidth: sel ? 2.4 : 0.6 },
+      label: { show: !tiny, color: ink[lv] },
+      emphasis: { itemStyle: { areaColor: fill[lv], borderColor: accent, borderWidth: 2 }, label: { show: !tiny, color: ink[lv] } }
+    };
+  });
+  OUTSIDE.forEach(n => data.push({ name: n, value: -1,
+    itemStyle: { areaColor: na, borderColor: na, borderWidth: 0.6 }, label: { show: false },
+    emphasis: { itemStyle: { areaColor: na, borderColor: na }, label: { show: false } } }));
+  chart.setOption({ series: [{ data }] });
+}
+function setZoom(z){
+  zoom = Math.max(1, Math.min(8, z));
+  const opt = { series: [{ zoom, roam: zoom > 1 ? true : false }] };
+  if (zoom === 1) opt.series[0].center = null;
+  chart.setOption(opt);
+}
+function initGeo(){
+  const el = $("geo");
+  chart = window.echarts.init(el, null, { renderer: "svg" });
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: "map", map: "china", roam: false, zoom: 1, scaleLimit: { min: 1, max: 8 },
+      selectedMode: false, showLegendSymbol: false,
+      top: 8, bottom: 8, left: 8, right: 8,
+      label: { show: true, fontSize: 11, fontFamily: cssVar("--font-map") || "sans-serif", formatter: p => LABEL[p.name] || "" },
+      itemStyle: { borderWidth: 0.6 },
+      data: []
+    }]
+  });
+  chart.on("click", params => {
+    const code = NAME2CODE[params.name];
+    if (!code) { closePicker(false); return; }
+    const r = el.getBoundingClientRect(), ev = params.event || {};
+    const x = r.left + (ev.offsetX || r.width/2), y = r.top + (ev.offsetY || r.height/2);
+    openPicker(code, { left: x - 6, right: x + 6, top: y - 6, height: 12 });
+  });
+  chart.getZr().on("click", e => { if (!e.target) closePicker(false); });
+  chart.on("georoam", () => {
+    const o = chart.getOption().series[0];
+    zoom = o.zoom || 1;
+  });
+  $("zIn").addEventListener("click", () => setZoom(zoom * 1.6));
+  $("zOut").addEventListener("click", () => setZoom(zoom / 1.6));
+  $("zReset").addEventListener("click", () => setZoom(1));
+  const rerender = () => renderGeo();
+  try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rerender); } catch(e){}
+  new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  renderGeo();
+}
+function useTileMap(){
+  chart = null;
+  $("geo").hidden = true; $("mapbar").hidden = true;
+  $("map").removeAttribute("hidden");
+  $("mapnote").textContent = "真實比例地圖載入失敗，先用方格地圖顯示。重新整理頁面可以再試一次。";
+}
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const sc = document.createElement("script"); sc.src = src; sc.async = false;
+    sc.onload = res; sc.onerror = () => rej(new Error(src));
+    document.head.appendChild(sc);
+  });
+}
+async function loadGeo(){
+  const guard = setTimeout(() => { if (!chart) useTileMap(); }, 12000);
+  try {
+    await loadScript("https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js");
+    await loadScript("https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js");
+    if (!window.echarts || !window.echarts.getMap("china")) throw new Error("no map");
+    if ($("geo").hidden) return; // fallback already shown
+    clearTimeout(guard);
+    initGeo();
+  } catch(e){ clearTimeout(guard); useTileMap(); }
+}
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", ev => {
+  ev.stopPropagation(); openPicker(c.dataset.code, c.getBoundingClientRect());
+}));
+
+// ---------- start ----------
+buildMap(); buildList();
+levels = loadLocal();
+render();
+connect();
+loadGeo();
+})();
+</script>
+</body>
+</html>
