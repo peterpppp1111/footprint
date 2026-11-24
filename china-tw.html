@@ -171,7 +171,7 @@ h1{font-family:var(--font-display);font-size:34px;line-height:1.2;letter-spacing
   <header class="top">
     <div>
       <a class="back" href="./">← 所有地圖</a>
-      <p class="eyebrow">22 省 · 5 自治區 · 4 直轄市 · 2 特別行政區 · 臺灣</p>
+      <p class="eyebrow">23 省 · 5 自治區 · 4 直轄市 · 2 特別行政區</p>
       <h1>中國省級行政區足跡</h1>
       <p class="sub">點地圖上的省、自治區或直轄市，選擇你在那裡的經歷。紀錄存在這個瀏覽器裡，別人看不到。換手機或電腦時，用下方的「複製備份」和「匯入備份」搬過去。</p>
     </div>
@@ -272,7 +272,7 @@ const LEVELS = [
   {lv:2, name:"住宿／遊玩", desc:"下車走訪、遊玩、過夜或住過"}
 ];
 const MAXLV = 2;
-const REGIONS = ["華北","東北","華東","華中","華南","西南","西北","臺灣"];
+const REGIONS = ["華北","東北","華東","華中","華南","西南","西北"];
 
 // [division code, official name, map label, region index, col, row, width, height]
 const P = [
@@ -289,7 +289,7 @@ const P = [
   ["53","雲南省","雲南",5,1,5],["54","西藏自治區","西藏",5,0,3,1,2],
   ["61","陝西省","陝西",6,2,3],["62","甘肅省","甘肅",6,1,2],["63","青海省","青海",6,1,3],
   ["64","寧夏回族自治區","寧夏",6,2,2],["65","新疆維吾爾自治區","新疆",6,0,1,1,2],
-  ["71","臺灣","臺灣",7,6,6]
+  ["71","臺灣省","臺灣",2,6,6]
 ];
 const TOTAL = P.length, MAXSCORE = TOTAL * MAXLV;
 const BY = {}; P.forEach(p => BY[p[0]] = p);
